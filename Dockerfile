@@ -1,18 +1,15 @@
-FROM nginx
-MAINTAINER Mahmoud Gamal <mhmoudgmal.89@gmail.com>
+FROM alpine:3.4
 
-COPY dist/index.html /usr/share/nginx/html
-COPY dist/* /usr/share/nginx/html/
+RUN apk --update add nginx php5-fpm && \
+    mkdir -p /var/log/nginx && \
+    touch /var/log/nginx/access.log && \
+    mkdir -p /run/nginx
 
-# NOTE
-# copying (crt & key) files from the build server directory to avoid including them in github repo.
-# @see Jenkinsfile - copy the certs to the workspace then you shoud be good to enable the following lines
-#
-# COPY certs/mydomain.crt /etc/ssl/certs
-# COPY certs/mydomain.key /etc/ssl/private
+ADD www /www
+ADD nginx.conf /etc/nginx/
+ADD php-fpm.conf /etc/php5/php-fpm.conf
 
-ADD nginx /tmp/nginx
-
-RUN cat /tmp/nginx/sites-enabled/production > /etc/nginx/conf.d/default.conf
+EXPOSE 80
+CMD php-fpm -d variables_order="EGPCS" && (tail -F /var/log/nginx/access.log &) && exec nginx -g "daemon off;"
 
 
