@@ -6,9 +6,9 @@ pipeline {
     // This section contains environment variables which are available for use in the
     // pipeline's stages.
     environment {
-	    region = "eu-west-3"
-        docker_repo_uri = "110609031244.dkr.ecr.eu-west-3.amazonaws.com/sample-app:latest"
-		task_def_arn = "arn:aws:ecs:eu-west-3:110609031244:task-definition/first-run-task-definition:3"
+	region = "eu-west-3"
+        docker_repo_uri = "110609031244.dkr.ecr.eu-west-3.amazonaws.com/sample-app"
+	task_def_arn = "arn:aws:ecs:eu-west-3:110609031244:task-definition/first-run-task-definition:3"
         cluster = "safaework"
         exec_role_arn = "arn:aws:iam::110609031244:role/ecsTaskExecutionRole"
     }
@@ -29,5 +29,15 @@ pipeline {
         sh "docker push ${docker_repo_uri}:${commit_id}"
         // Clean up
         sh "docker rmi -f ${docker_repo_uri}:${commit_id}"
+    }
+}
+    stage('Deploy') {
+    steps {
+        // Override image field in taskdef file
+        sh "sed -i 's|{{image}}|${docker_repo_uri}:${commit_id}|' taskdef.json"
+        // Create a new task definition revision
+        sh "aws ecs register-task-definition --execution-role-arn ${exec_role_arn} --cli-input-json file://taskdef.json --region ${region}"
+        // Update service on Fargate
+        sh "aws ecs update-service --cluster ${cluster} --service sample-app-service --task-definition ${task_def_arn} --region ${region}"
     }
 }
