@@ -1,21 +1,20 @@
-// Declarative pipelines must be enclosed with a "pipeline" directive.
 pipeline {
     // This line is required for declarative pipelines. Just keep it here.
     agent any
-
+ 
     // This section contains environment variables which are available for use in the
     // pipeline's stages.
-    environment {
+environment {
 	region = "eu-west-3"
-        docker_repo_uri = "110609031244.dkr.ecr.eu-west-3.amazonaws.com/sample-app"
+    docker_repo_uri = "110609031244.dkr.ecr.eu-west-3.amazonaws.com/sample-app"
 	task_def_arn = "arn:aws:ecs:eu-west-3:110609031244:task-definition/first-run-task-definition:3"
-        cluster = "safaework"
-        exec_role_arn = "arn:aws:iam::110609031244:role/ecsTaskExecutionRole"
-    }
+    cluster = "safaework"
+    exec_role_arn = "arn:aws:iam::110609031244:role/ecsTaskExecutionRole"
+}
     
     // Here you can define one or more stages for your pipeline.
     // Each stage can execute one or more steps.
-    stage('Build') {
+stage('Build') {
     steps {
         // Get SHA1 of current commit
         script {
@@ -30,8 +29,9 @@ pipeline {
         // Clean up
         sh "docker rmi -f ${docker_repo_uri}:${commit_id}"
     }
+	    
 }
-    stage('Deploy') {
+stage('Deploy') {
     steps {
         // Override image field in taskdef file
         sh "sed -i 's|{{image}}|${docker_repo_uri}:${commit_id}|' taskdef.json"
@@ -40,4 +40,5 @@ pipeline {
         // Update service on Fargate
         sh "aws ecs update-service --cluster ${cluster} --service sample-app-service --task-definition ${task_def_arn} --region ${region}"
     }
+}
 }
