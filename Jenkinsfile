@@ -6,11 +6,11 @@ pipeline {
     // This section contains environment variables which are available for use in the
     // pipeline's stages.
     environment {
-	    region = "us-east-1"
-        docker_repo_uri = ""
-		task_def_arn = ""
-        cluster = ""
-        exec_role_arn = ""
+	    region = "eu-west-3"
+        docker_repo_uri = "110609031244.dkr.ecr.eu-west-3.amazonaws.com/sample-app:latest"
+		task_def_arn = "arn:aws:ecs:eu-west-3:110609031244:task-definition/first-run-task-definition:3"
+        cluster = "safaework"
+        exec_role_arn = "arn:aws:iam::110609031244:role/ecsTaskExecutionRole"
     }
     
     // Here you can define one or more stages for your pipeline.
