@@ -1,4 +1,5 @@
 // Declarative pipelines must be enclosed with a "pipeline" directive.
+// Declarative pipelines must be enclosed wje se
 pipeline {
     // This line is required for declarative pipelines. Just keep it here.
     agent any
