@@ -1,16 +1,9 @@
-FROM golang:alpine as builder
+FROM ubuntu:16.04
 
-COPY . /code
-WORKDIR /code
+RUN apt-get update && apt-get install -y python python-pip
 
-# Run unit tests
-RUN go test
+RUN pip install flask 
 
-# Build app
-RUN go build -o sample-app
+COPY app.py /opt/
 
-FROM alpine
-
-COPY --from=builder /code/sample-app /sample-app
-CMD /sample-app
-
+ENTRYPOINT FLASK_APP=/opt/app.py flask run --host=0.0.0.0 --port=8080
